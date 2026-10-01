@@ -1,9 +1,10 @@
-name: Anime Recommendation
+name: Anime Recommendation Bot
+run-name: Anime recommendation
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "17,47 * * * *"
 
 jobs:
   recommend:
