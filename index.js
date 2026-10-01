@@ -6,7 +6,7 @@ const client = new Client({
 
 const CHANNEL_ID = "1553867647597154394";
 
-// How often to recommend (30 minutes)
+// 30 minutes
 const INTERVAL = 30 * 60 * 1000;
 
 async function recommendAnime() {
@@ -18,13 +18,14 @@ async function recommendAnime() {
     const data = await response.json();
     const anime = data.data;
 
+    const channel = await client.channels.fetch(CHANNEL_ID);
+
     const embed = new EmbedBuilder()
       .setTitle(`🍥 ${anime.title}`)
-      .setURL(anime.url)
       .setDescription(
         anime.synopsis
-          ? anime.synopsis.substring(0, 1000)
-          : "No description available."
+          ? anime.synopsis.substring(0, 700)
+          : "No synopsis available."
       )
       .addFields(
         {
@@ -36,40 +37,39 @@ async function recommendAnime() {
           name: "📺 Episodes",
           value: anime.episodes
             ? `${anime.episodes}`
-            : "Unknown",
+            : "N/A",
           inline: true
         },
         {
-          name: "🎭 Genres",
-          value:
-            anime.genres?.map(g => g.name).join(", ") || "Unknown",
-          inline: false
+          name: "🎭 Type",
+          value: anime.type || "N/A",
+          inline: true
         }
       )
       .setImage(anime.images.jpg.large_image_url)
+      .setURL(anime.url)
       .setFooter({
-        text: "🤖 Automatic Anime Recommendation"
+        text: "🍥 Anime Recommendation System"
       });
 
-    const channel = await client.channels.fetch(CHANNEL_ID);
+    await channel.send({
+      content: "✨ **New Anime Recommendation!**",
+      embeds: [embed]
+    });
 
-    if (channel) {
-      channel.send({
-        content: "🍥 **ANIME RECOMMENDATION** 🍥",
-        embeds: [embed]
-      });
-    }
-
+    console.log(`Recommended: ${anime.title}`);
   } catch (error) {
-    console.error("Anime recommendation error:", error);
+    console.error("Recommendation error:", error);
   }
 }
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
+  // Send first recommendation after the bot starts
   recommendAnime();
 
+  // Then every 30 minutes
   setInterval(recommendAnime, INTERVAL);
 });
 
